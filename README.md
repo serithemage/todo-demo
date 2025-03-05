@@ -39,6 +39,122 @@
 4. **프레임워크 및 드라이버 계층 (Frameworks & Drivers)**
    - 데이터베이스(Dexie.js), UI 프레임워크(Bootstrap) 등 외부 도구
 
+### 아키텍처 다이어그램
+
+```mermaid
+graph TD
+    subgraph "UI 계층"
+        UI[TodoApp.js]
+    end
+    
+    subgraph "프레임워크 및 드라이버 계층"
+        DB[TodoDatabase.js]
+    end
+    
+    subgraph "인터페이스 어댑터 계층"
+        Repo[DexieTodoRepository.js]
+    end
+    
+    subgraph "유스케이스 계층"
+        UC[TodoUseCases.js]
+        RepoInterface[TodoRepository.js]
+    end
+    
+    subgraph "엔티티 계층"
+        Entity[Todo.js]
+    end
+    
+    UI --> UC
+    UC --> RepoInterface
+    UC --> Entity
+    Repo --> RepoInterface
+    Repo --> DB
+    Repo --> Entity
+    
+    style UI fill:#f9f,stroke:#333,stroke-width:2px
+    style DB fill:#bbf,stroke:#333,stroke-width:2px
+    style Repo fill:#bfb,stroke:#333,stroke-width:2px
+    style UC fill:#fbb,stroke:#333,stroke-width:2px
+    style RepoInterface fill:#fbb,stroke:#333,stroke-width:2px
+    style Entity fill:#ff9,stroke:#333,stroke-width:2px
+```
+
+### 주요 시퀀스 다이어그램
+
+#### 할 일 추가 시퀀스
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant UI as TodoApp.js
+    participant UC as TodoUseCases.js
+    participant Entity as Todo.js
+    participant Repo as DexieTodoRepository.js
+    participant DB as TodoDatabase.js
+    
+    User->>UI: 할 일 정보 입력 및 추가 버튼 클릭
+    UI->>UC: createTodo(title, description, dueDate)
+    UC->>Entity: new Todo(null, title, description, dueDate, 'TODO')
+    Entity-->>UC: 새로운 Todo 객체
+    UC->>Repo: save(todo)
+    Repo->>DB: table('todos').add(todo.toJSON())
+    DB-->>Repo: 생성된 Todo ID
+    Repo-->>UC: 저장된 Todo 객체
+    UC-->>UI: 저장된 Todo 객체
+    UI->>UI: 화면에 새 할 일 표시
+    UI-->>User: 할 일 추가 완료 확인
+```
+
+#### 할 일 검색 시퀀스
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant UI as TodoApp.js
+    participant UC as TodoUseCases.js
+    participant Repo as DexieTodoRepository.js
+    participant DB as TodoDatabase.js
+    
+    User->>UI: 검색어 입력
+    UI->>UC: searchTodos(query)
+    UC->>Repo: search(query)
+    Repo->>DB: table('todos').toArray()
+    DB-->>Repo: 모든 Todo 항목
+    Repo->>Repo: 검색어로 필터링
+    Repo-->>UC: 필터링된 Todo 객체 배열
+    UC-->>UI: 필터링된 Todo 객체 배열
+    UI->>UI: 검색 결과 표시
+    UI-->>User: 검색 결과 확인
+```
+
+#### 할 일 상태 변경 시퀀스
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant UI as TodoApp.js
+    participant UC as TodoUseCases.js
+    participant Entity as Todo.js
+    participant Repo as DexieTodoRepository.js
+    participant DB as TodoDatabase.js
+    
+    User->>UI: 할 일 상태 변경 (체크박스 클릭)
+    UI->>UC: updateTodo(id, {status: newStatus})
+    UC->>Repo: getById(id)
+    Repo->>DB: table('todos').get(id)
+    DB-->>Repo: Todo 데이터
+    Repo-->>UC: Todo 객체
+    UC->>Entity: todo.update({status: newStatus})
+    Entity-->>UC: 업데이트된 Todo 객체
+    UC->>Repo: save(updatedTodo)
+    Repo->>DB: table('todos').update(id, updatedTodo.toJSON())
+    DB-->>Repo: 업데이트 성공
+    Repo-->>UC: 업데이트된 Todo 객체
+    UC-->>UI: 업데이트된 Todo 객체
+    UI->>UI: 화면에 변경된 상태 표시
+    UI-->>User: 상태 변경 완료 확인
+```
+
 ## 프로젝트 구조
 
 ```
