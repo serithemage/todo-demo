@@ -1,0 +1,31 @@
+{
+  "name": "todo-demo",
+  "version": "1.0.0",
+  "description": "이 프로젝트는 웹 브라우저에서 작동하는 클라이언트 측 Todo 앱입니다. 사용자는 할 일을 추가, 수정, 삭제하고 상태를 관리할 수 있습니다. 이 앱은 SOLID 원칙, Clean Architecture 및 TDD 방법론을 적용하여 개발되었습니다.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+    "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "jest": {
+    "transform": {},
+    "testEnvironment": "jsdom"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.26.9",
+    "@babel/preset-env": "^7.26.9",
+    "babel-jest": "^29.7.0",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0"
+  },
+  "dependencies": {
+    "dexie": "^4.0.11"
+  }
+}
